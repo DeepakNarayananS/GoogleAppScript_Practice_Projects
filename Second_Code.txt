@@ -1,0 +1,12 @@
+function copysheetnames() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();  // Get active sheet in the current spreadsheet.
+
+  var spreadsheeturl = "https://docs.google.com/spreadsheets/d/1ucwRUfk-DlZm2GR7vFOOy3c-YS14e5X-BUwJKcwlLl8/edit?gid=1764060694#gid=1764060694";  // URL of another spreadsheet.
+
+  var sheets = SpreadsheetApp.openByUrl(spreadsheeturl).getSheets();  // Open the spreadsheet by URL and get all its sheets.
+
+  for (i = 0; i < sheets.length; i++) {  // Loop through each sheet in the spreadsheet.
+    ss.appendRow([sheets[i].getName()]);  // Add the name of each sheet as a new row in the active sheet.
+  }
+}
+
