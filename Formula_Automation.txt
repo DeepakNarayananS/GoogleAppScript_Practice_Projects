@@ -1,0 +1,21 @@
+function formula() {
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+
+  ss.getRange("D2").setFormula("=(A2+B2)*C2");
+
+  var lr = ss.getLastRow();
+
+  var filldown = ss.getRange(2,4,lr-1);
+
+  ss.getRange("D2").copyTo(filldown);
+  
+}
+
+function clearmess() {
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+
+  var clean = ss.getRange("A1:D7").clearContent();
+
+}
