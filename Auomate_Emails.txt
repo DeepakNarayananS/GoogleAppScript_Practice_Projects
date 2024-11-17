@@ -1,0 +1,33 @@
+function mailAutomate() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Details");
+  var lr = ss.getLastRow();
+  
+  // Log the last row to check if it's correct
+  Logger.log("Last Row: " + lr);
+  
+  var template = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Template").getRange(1, 1).getValue();
+  
+  // Log the template to check if it's correct
+  Logger.log("Template: " + template);
+
+  // Loop through rows in the "Details" sheet
+  for (var i = 2; i <= lr; i++) {
+    var recipient = ss.getRange(i, 1).getValue();  // Column 1 for email
+    var names = ss.getRange(i, 2).getValue();     // Column 2 for names
+    var topics = ss.getRange(i, 3).getValue();    // Column 3 for topics
+
+    // Log recipient, names, and topics to verify they are correct
+    Logger.log("Row " + i + ": recipient = " + recipient + ", names = " + names + ", topics = " + topics);
+
+    var subject = "Regarding : Mail Automation Test with AppScript";
+
+    // Replace placeholders in the template with actual values
+    var body = template.replace("{Names}", names).replace("{Topics}", topics);
+
+    // Log the body to verify that the placeholders have been replaced correctly
+    Logger.log("Body for Row " + i + ": " + body);
+
+    // Send email
+    MailApp.sendEmail(recipient, subject, body);
+  }
+}

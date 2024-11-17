@@ -1,0 +1,9 @@
+function practice() 
+{
+  var app = SpreadsheetApp;
+  var as = app.getActiveSpreadsheet();
+  var ss = as.getActiveSheet();
+  var input = ss.getRange(6,2).getValue();
+  var output = ss.getRange(6,4).setValue(input);
+  Logger.log(output);
+}

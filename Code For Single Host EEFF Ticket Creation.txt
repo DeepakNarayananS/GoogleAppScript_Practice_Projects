@@ -1,0 +1,126 @@
+To achieve this using Google Apps Script, we need to:
+Set up a trigger to detect when a new form submission is added to the sheet.
+Extract the necessary data from the sheet, which includes hostnames, AD groups, and file server paths.
+Generate a separate Jira ticket for each combination of hostname, AD group, and file server path.
+Use the Jira API to create the ticket for each combination.
+
+Step-by-Step Implementation
+1. Set Up Trigger
+We need to set up an "on form submit" trigger, which will automatically run the script when a new form response is submitted.
+
+2. Extract Data
+You’ll need to extract the hostnames, AD groups, and file server paths from their respective cells. We will assume that these values are comma-separated strings in the form.
+
+3. Create Jira Tickets
+You can use Jira's REST API to create a ticket. You'll need to make a POST request to Jira with the necessary data.
+
+Sample Google Apps Script Code:-
+
+// Trigger function for new form submission
+function onFormSubmit(e) {
+  var sheet = e.source.getActiveSheet();
+  var row = e.range.getRow();
+  
+  // Get the values from the form response row
+  var hostnamesCell = sheet.getRange(row, 1).getValue();  // Assuming hostnames are in column 1
+  var adGroupsCell = sheet.getRange(row, 2).getValue();    // Assuming AD groups are in column 2
+  var filePathsCell = sheet.getRange(row, 3).getValue();   // Assuming file paths are in column 3
+
+  // Split the values by commas to get arrays
+  var hostnames = hostnamesCell.split(',').map(function(item) { return item.trim(); });
+  var adGroups = adGroupsCell.split(',').map(function(item) { return item.trim(); });
+  var filePaths = filePathsCell.split(',').map(function(item) { return item.trim(); });
+
+  // Create a Jira ticket for each combination of hostname, AD group, and file server path
+  hostnames.forEach(function(hostname) {
+    adGroups.forEach(function(adGroup) {
+      filePaths.forEach(function(filePath) {
+        // Construct the ticket summary and description
+        var summary = 'New Issue for Hostname: ' + hostname;
+        var description = 'Host: ' + hostname + '\nAD Group: ' + adGroup + '\nFile Path: ' + filePath;
+        
+        // Call the function to create Jira issue
+        createJiraTicket(summary, description);
+      });
+    });
+  });
+}
+
+// Function to create a Jira ticket via Jira REST API
+function createJiraTicket(summary, description) {
+  var jiraUrl = 'https://yourcompany.atlassian.net';  // Jira instance URL
+  var apiEndpoint = '/rest/api/2/issue';
+  var username = 'your-email@example.com';  // Your Jira username (email)
+  var apiToken = 'your-api-token';         // Your Jira API token
+  
+  // Prepare Jira issue data
+  var issueData = {
+    fields: {
+      project: {
+        key: 'YOUR_PROJECT_KEY'  // Project key (e.g., 'IT', 'DEV')
+      },
+      summary: summary,
+      description: description,
+      issuetype: {
+        name: 'Task'  // You can change this to other issue types if needed
+      }
+    }
+  };
+
+  // Create a basic authentication header
+  var encodedCredentials = Utilities.base64Encode(username + ':' + apiToken);
+  
+  var options = {
+    method: 'post',
+    headers: {
+      'Authorization': 'Basic ' + encodedCredentials,
+      'Content-Type': 'application/json'
+    },
+    payload: JSON.stringify(issueData)
+  };
+  
+  // Make the API request to Jira
+  var response = UrlFetchApp.fetch(jiraUrl + apiEndpoint, options);
+  
+  // Log the response (optional)
+  Logger.log(response.getContentText());
+}
+
+Explanation of the Script
+Trigger Setup:
+The onFormSubmit(e) function is the trigger that runs whenever a new form response is submitted.
+This function accesses the submitted data (hostnames, AD groups, and file server paths) from the relevant cells.
+
+Data Parsing:
+The values in the form are assumed to be comma-separated, so split(',') is used to break them into arrays.
+
+Ticket Creation:
+For every combination of hostname, AD group, and file path, a new Jira ticket is created. The ticket’s summary and description are customized based on the combination.
+
+Jira API Call:
+The createJiraTicket(summary, description) function uses Jira’s REST API to create a new issue. You need to:
+Replace your-company.atlassian.net with your Jira domain.
+Replace YOUR_PROJECT_KEY with the Jira project key (e.g., "IT" or "DEV").
+Use your Jira email and API token for authentication. You can generate an API token from your Atlassian account.
+
+Logging:
+Logger.log(response.getContentText()) is used to log the response from Jira for debugging purposes.
+
+To Set Up the Script:
+Go to Google Sheets.
+Click on Extensions > Apps Script.
+Paste the script into the code editor.
+Save the script.
+Set the trigger:
+Go to Triggers > Add Trigger in the Apps Script editor.
+Select onFormSubmit as the function to run.
+Set the event type to On form submit.
+
+Testing the Script:
+Fill out the form, and after the submission, the script should automatically generate tickets for each combination of hostname, AD group, and file path.
+Check your Jira board to see the tickets being created.
+
+Notes:
+You might want to modify the project key and issue type based on your Jira setup.
+Ensure your Jira instance allows API access and that your credentials (email and API token) are correct.
+This script assumes that all input data is properly formatted. You might need to add error handling if your data format varies.
